@@ -1,0 +1,68 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: auto;
+}
+
+
+
+.p, h1 {
+    text-align: center;
+    padding: 0 0 20px 0;
+    
+}
+form {
+    margin: 0 auto;
+    position: relative;
+    left: 0;
+    width: 500px;
+}
+
+
+
+.form_groupe {
+    margin-bottom: 1rem;
+    
+}
+.form_control {
+    background-clip: padding-box;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    color: #495057;
+    display: block;
+    font-size: 1rem;
+    font-weight: 400;
+    height: calc(1.5em + .75rem + 2px);
+    line-height: 1.5;
+    padding: .375rem .75rem;
+    width: 100%;
+}
+button, select {
+    text-transform: none;
+    width: 100%;
+}
+.check_radio, .form_check {
+    padding-left: 0;
+}
+.form_check {
+    display: block;
+    position: relative;
+}
+@media (max-width: auto) {
+    .check_radio {
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+.check_radio {
+    align-items: stretch;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: nowrap;
+    font-size: 0;
+    margin: 0 0 1.5rem;
+}
+
