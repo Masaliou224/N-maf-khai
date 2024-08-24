@@ -12,7 +12,7 @@
         <nav>
             <a href="index.php" class="nav">Acceuil</a>
             <a href="#" class="nav">Service</a>
-            <a href="locataire.php" class="nav">Mon espace</a>
+            <a href="propriétaire" class="nav">Mon espace</a>
         </nav>
     </header>
     <div class="global">
@@ -63,7 +63,7 @@
                     <div class="item-icon bg-indigo">
                         <span class="icon">📂</span>
                     </div>
-                    <p><b>Mon dossier de location</b></p>
+                    <p><b>Mon dossier de propriétaire</b></p>
                 </a>
             </div>
             <div class="card">

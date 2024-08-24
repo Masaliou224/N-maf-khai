@@ -1,76 +1,40 @@
 
 <?php
     session_start();
-    require_once('./connexion.php');
-    require_once('./function.php');
+    // Include connexion file
+    require_once "db.php"; 
 
-    if (!empty($_POST)) {
-
-        $errors = [];
-
-        // Pseudo
-        if (empty($_POST['nom']) || !preg_match("#^[a-zA-Z0-9_]+$#", $_POST['nom'])) {
-            $errors['nom'] = "Votre pseudo n'est pas valide";
-        } else {
-            // SELECT * FROM users WHERE username = post
-            $query = "SELECT * FROM locataire WHERE nom = ?";
-            $req = $pdo->prepare($query);
-            $req->execute([$_POST['nom']]);
-            if ($req->fetch()) {
-                $errors['nom'] = "Ce pseudo n'est plus disponible";
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        // $genre = $_POST['genre'];
+        $nom = htmlspecialchars($_POST['nom']);
+        $prenom = htmlspecialchars($_POST['prenom']);
+        $email = htmlspecialchars($_POST['email']);
+        $tel = htmlspecialchars($_POST['tel']);
+        $user_type = htmlspecialchars($_POST['user_type']);
+        $password = $_POST['password'];
+        $confirm_password = $_POST['confirm_password'];
+    
+        if ($password === $confirm_password) {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    
+            $stmt = $pdo->prepare("INSERT INTO locataire (nom, prenom, email, tel, user_type, password) VALUES (:nom, :prenom, :email, :tel, :user_type, :password)");
+            // $stmt->bindParam(':genre', $genre);
+            $stmt->bindParam(':nom', $nom);
+            $stmt->bindParam(':prenom', $prenom);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':tel', $tel);
+            $stmt->bindParam(':user_type', $user_type);
+            $stmt->bindParam(':password', $hashed_password);
+    
+            if ($stmt->execute()) {
+                // Registration successful, redirect to login page
+                header("Location: connexion.php");
+                exit;
+            } else {
+                echo "Erreur lors de l'inscription.";
             }
-        }
-        if (empty($_POST['prenom']) || !preg_match("#^[a-zA-Z0-9_]+$#", $_POST['prenom'])) {
-            $errors['prenom'] = "Votre pseudo n'est pas valide";
         } else {
-            // SELECT * FROM users WHERE username = post
-            $query = "SELECT * FROM locataire WHERE prenom = ?";
-            $req = $pdo->prepare($query);
-            $req->execute([$_POST['prenom']]);
-            if ($req->fetch()) {
-                $errors['prenom'] = "Ce pseudo n'est plus disponible";
-            }
-        }
-
-        // Email
-        if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = "Votre email n'est pas valide";
-        } else {
-            // SELECT * FROM users WHERE email = post
-            $query = "SELECT * FROM locataire WHERE email = ?";
-            $req = $pdo->prepare($query);
-            $req->execute([$_POST['email']]);
-            if ($req->fetch()) {
-                $errors['email'] = "Cet email est déjà pris";
-            }
-        }
-
-        // Password
-        if (empty($_POST['password']) || $_POST['password'] !== $_POST['password_confirmed']) {
-            $errors['password'] = "Vous devez rentrez un mot de passe valide et confirmé";
-        }
-
-        if (empty($errors)) {
-            $query = "INSERT INTO lacataire(nom,prenom,email,tel,password,confirmation_token) VALUES(?,?,?,?)";
-            $req = $pdo->prepare($query);
-            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-            $token = generateToken(100);
-
-            $req->execute([$_POST['nom'], $_POST['prenom'], $_POST['email'], $_POST['tel'], $password, $token]);
-            $userId = $pdo->lastInsertId();
-
-            $mail = $_POST['email'];
-            $subject = "Confirmation du compte";
-            $message = "Afin de confirmer votre compte,merci de cliquer sur ce lien\n\n
-            http://localhost/N'mafôkhai/confirm.php?id=$userId&token=$token";
-
-            mail($mail, $subject, $message);
-
-            $_SESSION['flash']['success'] = "Compte créé avec sucèss. Veillez vérifier votre boite mail afin de confirmer votre compte";
-
-            header("Location: locataire.php");
-            exit();
+            echo "Les mots de passe ne correspondent pas.";
         }
     }
     ?>
@@ -104,52 +68,49 @@
             <div class="p">Inscription</div>
             <div class="p">
                 "Vous avez déjà un compte?"
-                <a href="#">Se connecter</a>
+                <a href="connexion.php">Se connecter</a>
             </div>
             <div class="p">Renseignez ces informations pour créer votre compte</div>
-    
-            <form action="" method="POST">
-                
-                <div class="form_groupe">
-                    <select name="genre" id="" class="form_control">
-                        <option value="M.">M.</option>
-                        <option value="Mme.">Mme.</option>
-                    </select>
-                </div>
-                <div class="form_groupe">
-                    <input type="text" name="nom" placeholder="Nom" required class="form_control">
-                </div>
-                <div class="form_groupe">
-                    <input type="text" name="prenom" placeholder="Prénom" required class="form_control">
-                </div>
-                <div class="form_groupe">
-                    <input type="email" name="email" placeholder="adress@email.com" id=""required class="form_control">
-                </div>
-                <div class="form_groupe">
-                    <input type="tel" name="tel" placeholder="Téléphone" required class="form_control">
-                </div>
-                <div class="form_groupe">
-                    <input type="password" name="password" placeholder="Mots de passe" id="" required class="form_control">
-                </div>
-                <div class="form_groupe">
-                    <input type="password" name="password_confirmed" placeholder="Confirmer le mots de passe" id="" required class="form_control">
-                </div>
-                <!-- <fieldset>
-                    <div class="check_radio">
-                        <div class="form_check">
-                            <input type="radio" id="locataire" name="locataire" required class="" value="ROLE_LOCATAIRE" checked>
-                            <label for="locataire">locataire</label> 
-                        </div>
-                        <div class="form_check">
-                            <input type="radio" id="proprietaire" name="proprietaire" required class="" value="ROLE_PROPRIETAIRE" checked>
-                            <label for="proprietaire">propriétaire</label>
-                        </div>
+
+            <div class="form">
+                <form action="" method="POST">
+                    
+                    <div class="form_groupe">
+                        <select name="genre" id="genre" class="form_control">
+                            <option value="M.">M.</option>
+                            <option value="Mme.">Mme.</option>
+                        </select>
                     </div>
-                </fieldset> -->
-                <div class="form_groupe">
-                    <input type="submit" value="Valider" name="button"  class="form_control"/>
-                </div>
-            </form>
+                    <div class="form_groupe">
+                        <input type="text" name="nom" id="nom" placeholder="Nom" required class="form_control">
+                    </div>
+                    <div class="form_groupe">
+                        <input type="text" name="prenom" id="prenom" placeholder="Prénom" required class="form_control">
+                    </div>
+                    <div class="form_groupe">
+                        <input type="email" name="email" placeholder="adress@email.com" id="email" required class="form_control">
+                    </div>
+                    <div class="form_groupe">
+                        <input type="tel" name="tel" id="tel" placeholder="Téléphone" required class="form_control">
+                    </div>
+                    <div class="form_groupe">
+                        <select name="user_type" id="user_type" class="form_control" required>
+                            <option value="tenant">Locataire</option>
+                            <option value="owner">Propriétaire</option>
+                        </select>
+                    </div>
+                    <div class="form_groupe">
+                        <input type="password" name="password" placeholder="Mots de passe" id="password" required class="form_control">
+                    </div>
+                    <div class="form_groupe">
+                        <input type="password" name="confirm_password" placeholder="Confirmer le mots de passe" id="confirm_password" required class="form_control">
+                    </div>
+                    
+                    <div class="form_groupe">
+                        <input type="submit" value="Valider" name="button"  class="form_control"/>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </body>
